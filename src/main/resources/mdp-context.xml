@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jms="http://www.springframework.org/schema/jms"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd 
+        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+        http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.0.xsd">
+
+	<context:annotation-config />
+	<context:component-scan base-package="br.com.brunolellis.springmdp" />
+
+	<task:annotation-driven />
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		p:location="./springmdp.properties"
+		p:ignoreUnresolvablePlaceholders="false" />
+
+	<bean name="qConnectionFactory" class="org.hornetq.jms.client.HornetQJMSConnectionFactory">
+		<constructor-arg value="false" />
+		<constructor-arg>
+			<bean name="transportConfiguration" class="org.hornetq.api.core.TransportConfiguration">
+				<constructor-arg value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory" />
+				<constructor-arg>
+					<map key-type="java.lang.String" value-type="java.lang.Object">
+						<entry key="host" value="${servidor}" />
+						<entry key="port" value="${porta}" />
+					</map>
+				</constructor-arg>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<jms:listener-container acknowledge="transacted" connection-factory="qConnectionFactory">
+		<jms:listener destination="exampleQueue" ref="exampleMDP" />
+	</jms:listener-container>
+
+</beans>
